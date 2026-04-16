@@ -132,7 +132,7 @@ function renderFromData(extractedData) {
 
     let logoDataUri = '';
     try {
-        const logoPath = path.join(__dirname, '..', '..', 'logo', 'WhatsApp Image 2025-03-31 at 17.11.56_644e8239.jpg');
+        const logoPath = path.join(__dirname, '..', 'assets', 'logo.jpg');
         const logoBase64 = fs.readFileSync(logoPath).toString('base64');
         logoDataUri = `data:image/jpeg;base64,${logoBase64}`;
     } catch (e) {

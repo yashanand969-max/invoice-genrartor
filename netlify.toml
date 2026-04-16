@@ -1,0 +1,15 @@
+[build]
+  # Point Netlify to correct sub-directory for the frontend
+  base = "invoice-app/client"
+  
+  # Standard Vite command to generate static production files
+  command = "npm install && npm run build"
+  
+  # The output directory relative to the base directory
+  publish = "dist"
+
+# Configure standard React SPA routing: redirect all unhandled requests to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

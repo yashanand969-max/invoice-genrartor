@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get('/api/ping', (req, res) => res.status(200).send('pong'));
 app.use('/api', invoiceRoutes);
 
 // Error Handling block

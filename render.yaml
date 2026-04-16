@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: invoice-generator-api
+    env: docker
+    dockerContext: invoice-app/server
+    dockerfilePath: invoice-app/server/Dockerfile
+    plan: free
+    region: singapore # Adjust as needed
+    healthCheckPath: /api/ping # Recommended for smooth deployments, though we should add a ping route if needed, or simply let Render TCP check
