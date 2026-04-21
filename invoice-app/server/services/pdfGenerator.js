@@ -8,14 +8,16 @@ async function generatePdf(htmlContent) {
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--single-process'
+            '--disable-gpu'
         ]
     });
     
     try {
         const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        await page.setContent(htmlContent, { waitUntil: 'load', timeout: 30000 });
+        
+        // Let fonts load if any
+        await page.evaluateHandle('document.fonts.ready');
         
         const pdfBuffer = await page.pdf({ 
             format: 'A4', 

@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({ exposedHeaders: ['Content-Disposition'] }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Routes
 app.get('/api/ping', (req, res) => res.status(200).send('pong'));
