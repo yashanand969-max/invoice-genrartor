@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 async function generatePdf(htmlContent) {
-    const browser = await puppeteer.launch({ 
+    const launchOptions = {
         headless: true,
         args: [
             '--no-sandbox',
@@ -11,12 +11,18 @@ async function generatePdf(htmlContent) {
             '--single-process',
             '--no-zygote'
         ]
-    });
+    };
+
+    // Use the pre-installed Chrome in Docker (set via PUPPETEER_EXECUTABLE_PATH env var)
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    const browser = await puppeteer.launch(launchOptions);
     
     try {
         const page = await browser.newPage();
         
-        // Set content with a generous timeout for container environments
         await page.setContent(htmlContent, { 
             waitUntil: 'networkidle0',
             timeout: 30000

@@ -4,6 +4,10 @@ FROM ghcr.io/puppeteer/puppeteer:latest
 USER root
 WORKDIR /app
 
+# Skip Puppeteer's bundled Chrome download — the Docker image already has Chrome installed
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 # Copy package configurations from the server app
 COPY invoice-app/server/package*.json ./
 
