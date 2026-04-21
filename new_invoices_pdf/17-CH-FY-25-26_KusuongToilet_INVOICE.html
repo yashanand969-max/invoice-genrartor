@@ -41,10 +41,13 @@
         .text-slate-600 { color: #475569; }
         .text-slate-800 { color: #1e293b; }
         .text-green-700 { color: #15803d; }
-        
         @media print {
             body { background: white; margin: 0; padding: 0; }
-            .a4-page { box-shadow: none; margin: 0; padding: 10mm; width: 100%; }
+            .a4-page { width: 100%; margin: 0; padding: 10mm; box-shadow: none; min-height: auto; }
+            tr { page-break-inside: avoid; }
+            thead { display: table-header-group; }
+            .avoid-break { page-break-inside: avoid; }
+            header, footer { page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -71,7 +74,7 @@
     </header>
 
     <!-- ============ META DETAILS ============ -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; font-size:8px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; font-size:8px;" class="avoid-break">
         <!-- Left: Bill To + Consignee -->
         <div style="display:flex; gap:10px;">
             <div style="flex:1; border:1px solid var(--border); border-radius:6px; padding:8px;">
@@ -355,7 +358,7 @@
 
     <!-- ============ GST TAX BREAKDOWN TABLE (between items and totals) ============ -->
     
-    <div style="margin-top:10px; margin-bottom:10px;">
+    <div class="avoid-break" style="margin-top:10px; margin-bottom:10px;">
         <h3 style="font-family:'Montserrat',sans-serif; color:#1e3a8a; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
             GST Tax Breakdown
         </h3>
@@ -455,7 +458,7 @@
         </tr></tbody></table></div>
 
     <!-- ============ TOTALS ============ -->
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); margin-top:8px; padding-top:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); margin-top:8px; padding-top:10px;" class="avoid-break">
         <!-- Amount in words + Bank -->
         <div style="width:48%; font-size:8px;">
             <div style="margin-bottom:8px;">
@@ -494,7 +497,7 @@
 
 
     <!-- ============ FOOTER ============ -->
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;" class="avoid-break">
         <div style="width:50%;">
             <h4 style="font-weight:700; color:#1e293b; text-transform:uppercase; margin-bottom:3px; font-size:7px;">Terms & Conditions</h4>
             <ol style="padding-left:12px; color:#64748b; line-height:1.5;">
