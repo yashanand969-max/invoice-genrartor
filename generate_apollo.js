@@ -170,19 +170,12 @@ const invoiceHTML = `<!DOCTYPE html>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .heading-font { font-family: 'Montserrat', sans-serif; }
-        .a4-page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 12mm 15mm; }
+        .a4-page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 12mm 15mm; display: flex; flex-direction: column; }
         table { width: 100%; border-collapse: collapse; font-size: 0.65rem; }
         th, td { border: 1px solid var(--border); padding: 4px 6px; }
         th { background-color: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 0.5px; }
         .section-header td { border-left-color: var(--primary) !important; }
         .text-center { text-align: center; } .text-right { text-align: right; }
-        .avoid-break { 
-            page-break-inside: avoid !important; 
-            break-inside: avoid !important; 
-            display: table; 
-            width: 100%; 
-        }
-        tr { page-break-inside: avoid !important; break-inside: avoid !important; }
     </style>
 </head>
 <body>
@@ -230,7 +223,7 @@ const invoiceHTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <div style="margin-bottom: 20px;">
+    <div style="flex:1;">
         <table>
             <thead><tr>
                 <th style="width:4%;">S.No</th>
@@ -247,40 +240,38 @@ const invoiceHTML = `<!DOCTYPE html>
         </table>
     </div>
 
-    <div class="avoid-break" style="margin-top:auto; padding-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); padding-top:10px;">
-            <div style="width:48%; font-size:8px;">
-                <p style="font-weight:700; margin-bottom:2px;">Amount in Words:</p>
-                <p style="font-style:italic;">${amountInWords}</p>
-                <div style="background:#eff6ff; padding:8px; border-radius:6px; border:1px solid #bfdbfe; margin-top:10px;">
-                    <h3 style="font-size:8px; font-weight:700; color:#1e3a8a;">Bank Details</h3>
-                    <p>Bank: HDFC BANK | A/C: 50200073035859 | IFSC: HDFC0002679</p>
-                </div>
-            </div>
-            <div style="width:42%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); font-size:9px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Items Total:</span><span>₹ ${fmt(totalAmount)}</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Outstation Charges:</span><span>₹ ${fmt(outstationCharges)}</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #cbd5e1;"><span>IGST @ 18%:</span><span>₹ ${fmt(igstAmount)}</span></div>
-                <div style="display:flex; justify-content:space-between; background:#1e3a8a; color:white; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700;">
-                    <span>GRAND TOTAL</span><span>₹ ${fmt(grandTotal)}</span>
-                </div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); margin-top:8px; padding-top:10px;">
+        <div style="width:48%; font-size:8px;">
+            <p style="font-weight:700; margin-bottom:2px;">Amount in Words:</p>
+            <p style="font-style:italic;">${amountInWords}</p>
+            <div style="background:#eff6ff; padding:8px; border-radius:6px; border:1px solid #bfdbfe; margin-top:10px;">
+                <h3 style="font-size:8px; font-weight:700; color:#1e3a8a;">Bank Details</h3>
+                <p>Bank: HDFC BANK | A/C: 50200073035859 | IFSC: HDFC0002679</p>
             </div>
         </div>
-
-        <footer style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;">
-            <div style="width:50%;">
-                <ol style="padding-left:12px; color:#64748b;">
-                    <li>Payment due within 45 days.</li>
-                    <li>Cheque/NEFT in favour of "I FOUR U ENGINEERING SERVICES".</li>
-                </ol>
+        <div style="width:42%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); font-size:9px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Items Total:</span><span>₹ ${fmt(totalAmount)}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>Outstation Charges:</span><span>₹ ${fmt(outstationCharges)}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #cbd5e1;"><span>IGST @ 18%:</span><span>₹ ${fmt(igstAmount)}</span></div>
+            <div style="display:flex; justify-content:space-between; background:#1e3a8a; color:white; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700;">
+                <span>GRAND TOTAL</span><span>₹ ${fmt(grandTotal)}</span>
             </div>
-            <div style="text-align:center;">
-                <div style="border-top:1px solid #cbd5e1; padding-top:25px;">
-                    <p style="font-weight:700;">Authorized Signatory</p>
-                </div>
-            </div>
-        </footer>
+        </div>
     </div>
+
+    <footer style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;">
+        <div style="width:50%;">
+            <ol style="padding-left:12px; color:#64748b;">
+                <li>Payment due within 45 days.</li>
+                <li>Cheque/NEFT in favour of "I FOUR U ENGINEERING SERVICES".</li>
+            </ol>
+        </div>
+        <div style="text-align:center;">
+            <div style="border-top:1px solid #cbd5e1; padding-top:25px;">
+                <p style="font-weight:700;">Authorized Signatory</p>
+            </div>
+        </div>
+    </footer>
 </div>
 </body>
 </html>`;

@@ -104,22 +104,8 @@ function App() {
           
           showStatus('success', 'Invoice downloaded successfully.');
       } catch (error) {
-          console.error('Download error:', error);
-          let errMsg = 'Failed to generate PDF download.';
-          
-          if (error.response && error.response.data instanceof Blob) {
-              try {
-                  const text = await error.response.data.text();
-                  const json = JSON.parse(text);
-                  errMsg = json.error || errMsg;
-              } catch (e) {
-                  // Fallback if parsing fails
-              }
-          } else if (error.response?.data?.error) {
-              errMsg = error.response.data.error;
-          }
-          
-          showStatus('error', errMsg);
+          console.error(error);
+          showStatus('error', 'Failed to generate PDF download.');
       } finally {
           setIsDownloading(false);
       }

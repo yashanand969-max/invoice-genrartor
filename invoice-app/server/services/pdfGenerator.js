@@ -1,37 +1,14 @@
 const puppeteer = require('puppeteer');
-const fs = require('fs');
 
 async function generatePdf(htmlContent) {
-    let execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
-    if (!execPath) {
-        if (fs.existsSync('/usr/bin/google-chrome-stable')) {
-            execPath = '/usr/bin/google-chrome-stable';
-        } else if (fs.existsSync('/usr/bin/google-chrome')) {
-            execPath = '/usr/bin/google-chrome';
-        } else if (fs.existsSync('/usr/bin/chromium')) {
-            execPath = '/usr/bin/chromium';
-        } else {
-            execPath = puppeteer.executablePath();
-        }
-    }
-
     const browser = await puppeteer.launch({ 
         headless: true,
-        executablePath: execPath,
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu'
-        ]
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     
     try {
         const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'load', timeout: 30000 });
-        
-        // Let fonts load if any
-        await page.evaluateHandle('document.fonts.ready');
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
         
         const pdfBuffer = await page.pdf({ 
             format: 'A4', 

@@ -9,9 +9,7 @@ const logoBase64 = fs.readFileSync(path.join(__dirname, 'logo/WhatsApp Image 202
 const logoDataUri = `data:image/jpeg;base64,${logoBase64}`;
 
 // Read the Excel file
-const inputFile = process.argv[2] || 'work/KusuongToiletBill.xlsx';
-const baseName = path.basename(inputFile, '.xlsx').replace(/\s+/g, '');
-const workbook = xlsx.readFile(path.resolve(__dirname, inputFile), { cellDates: true });
+const workbook = xlsx.readFile(path.join(__dirname, 'work/KusuongToiletBill.xlsx'), { cellDates: true });
 const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, raw: false, dateNF: 'dd-mm-yyyy' });
 const data = rawData.map(row => Array.from(row).map(cell => (cell !== undefined && cell !== null) ? String(cell).trim() : ''));
 
@@ -217,7 +215,7 @@ function buildGstTable() {
     if (gstRows.length === 0) return '';
     
     let html = `
-    <div class="avoid-break" style="margin-top:10px; margin-bottom:10px;">
+    <div style="margin-top:10px; margin-bottom:10px;">
         <h3 style="font-family:'Montserrat',sans-serif; color:#1e3a8a; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
             GST Tax Breakdown
         </h3>
@@ -265,7 +263,7 @@ const invoiceHTML = `<!DOCTYPE html>
         
         .a4-page {
             width: 210mm; min-height: 297mm; margin: 0 auto; background: white;
-            position: relative; box-sizing: border-box;
+            position: relative; box-sizing: border-box; display: flex; flex-direction: column;
             padding: 12mm 15mm;
         }
         
@@ -293,14 +291,6 @@ const invoiceHTML = `<!DOCTYPE html>
         .text-slate-600 { color: #475569; }
         .text-slate-800 { color: #1e293b; }
         .text-green-700 { color: #15803d; }
-        
-        .avoid-break { 
-            page-break-inside: avoid !important; 
-            break-inside: avoid !important; 
-            display: table; 
-            width: 100%; 
-        }
-        tr { page-break-inside: avoid !important; break-inside: avoid !important; }
         
         @media print {
             body { background: white; margin: 0; padding: 0; }
@@ -374,7 +364,7 @@ const invoiceHTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============ ITEMS TABLE ============ -->
-    <div style="margin-bottom: 20px;">
+    <div style="flex:1;">
         <table>
             <thead><tr>
                 <th style="width:4%; text-align:center;">S.No</th>
@@ -395,61 +385,62 @@ const invoiceHTML = `<!DOCTYPE html>
     <!-- ============ GST TAX BREAKDOWN TABLE (between items and totals) ============ -->
     ${buildGstTable()}
 
-    <!-- ============ TOTALS AND FOOTER SECTION ============ -->
-    <div class="avoid-break" style="margin-top:auto; padding-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); padding-top:10px;">
-            <!-- Amount in words + Bank -->
-            <div style="width:48%; font-size:8px;">
-                <div style="margin-bottom:8px;">
-                    <p style="color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; font-size:7px; margin-bottom:2px;">Amount in Words:</p>
-                    <p style="font-style:italic; font-weight:500; color:#1e293b;">${amountInWords}</p>
-                </div>
-                <div style="background:#eff6ff; padding:8px; border-radius:6px; border:1px solid #bfdbfe;">
-                    <h3 class="heading-font" style="font-size:8px; color:#1e3a8a; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Bank Details</h3>
-                    <div style="display:grid; grid-template-columns:70px 1fr; gap:2px;">
-                        <span style="color:#64748b;">Bank:</span> <span style="font-weight:500;">HDFC BANK</span>
-                        <span style="color:#64748b;">A/C No:</span> <span style="font-weight:500; letter-spacing:0.5px;">50200073035859</span>
-                        <span style="color:#64748b;">IFSC:</span> <span style="font-weight:500;">HDFC0002679</span>
-                        <span style="color:#64748b;">Branch:</span> <span style="font-weight:500;">Sri Ram City, Saraidhela, Dhanbad 828127</span>
-                    </div>
-                </div>
+    <!-- ============ TOTALS ============ -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:2px solid var(--border); margin-top:8px; padding-top:10px;">
+        <!-- Amount in words + Bank -->
+        <div style="width:48%; font-size:8px;">
+            <div style="margin-bottom:8px;">
+                <p style="color:#64748b; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; font-size:7px; margin-bottom:2px;">Amount in Words:</p>
+                <p style="font-style:italic; font-weight:500; color:#1e293b;">${amountInWords}</p>
             </div>
-            
-            <!-- Math block -->
-            <div style="width:42%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); font-size:9px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span style="color:#475569;">Total (Before Tax):</span>
-                    <span style="font-weight:600;">₹ ${fmt(totalAmount)}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #cbd5e1;">
-                    <span style="color:#475569;">IGST @ 18%:</span>
-                    <span style="font-weight:500;">₹ ${fmt(igstAmount)}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#1e3a8a; color:white; padding:8px 10px; margin:-4px -4px -4px -4px; border-radius:6px; font-size:12px; font-weight:700;">
-                    <span class="heading-font">GRAND TOTAL</span>
-                    <span>₹ ${fmt(grandTotal)}</span>
+            <div style="background:#eff6ff; padding:8px; border-radius:6px; border:1px solid #bfdbfe;">
+                <h3 class="heading-font" style="font-size:8px; color:#1e3a8a; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Bank Details</h3>
+                <div style="display:grid; grid-template-columns:70px 1fr; gap:2px;">
+                    <span style="color:#64748b;">Bank:</span> <span style="font-weight:500;">HDFC BANK</span>
+                    <span style="color:#64748b;">A/C No:</span> <span style="font-weight:500; letter-spacing:0.5px;">50200073035859</span>
+                    <span style="color:#64748b;">IFSC:</span> <span style="font-weight:500;">HDFC0002679</span>
+                    <span style="color:#64748b;">Branch:</span> <span style="font-weight:500;">Sri Ram City, Saraidhela, Dhanbad 828127</span>
                 </div>
             </div>
         </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;">
-            <div style="width:50%;">
-                <h4 style="font-weight:700; color:#1e293b; text-transform:uppercase; margin-bottom:3px; font-size:7px;">Terms & Conditions</h4>
-                <ol style="padding-left:12px; color:#64748b; line-height:1.5;">
-                    <li>Payment due within 45 days of invoice date.</li>
-                    <li>Cheque/NEFT in favour of "I FOUR U ENGINEERING SERVICES".</li>
-                    <li>Goods once sold will not be taken back.</li>
-                    <li>Subject to Dhanbad jurisdiction.</li>
-                </ol>
-                <p style="color:#94a3b8; font-style:italic; margin-top:4px; font-size:6px;">This is a computer-generated invoice.</p>
+        
+        <!-- Math block -->
+        <div style="width:42%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid var(--border); font-size:9px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                <span style="color:#475569;">Total (Before Tax):</span>
+                <span style="font-weight:600;">₹ ${fmt(totalAmount)}</span>
             </div>
-            <div style="text-align:center; width:140px;">
-                <p style="font-size:7px; color:#64748b; margin-bottom:2px;">Certified that the particulars given above are true and correct</p>
-                <div style="border-top:1px solid #cbd5e1; padding-top:25px; margin-top:4px;">
-                    <p style="font-weight:700; color:#1e293b; font-size:8px;">Authorized Signatory</p>
-                    <p style="color:#64748b; font-size:7px;">For I FOUR U ENGINEERING SERVICES</p>
-                </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #cbd5e1;">
+                <span style="color:#475569;">IGST @ 18%:</span>
+                <span style="font-weight:500;">₹ ${fmt(igstAmount)}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e3a8a; color:white; padding:8px 10px; margin:-4px -4px -4px -4px; border-radius:6px; font-size:12px; font-weight:700;">
+                <span class="heading-font">GRAND TOTAL</span>
+                <span>₹ ${fmt(grandTotal)}</span>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ============ FOOTER ============ -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--border); margin-top:8px; padding-top:8px; font-size:7px;">
+        <div style="width:50%;">
+            <h4 style="font-weight:700; color:#1e293b; text-transform:uppercase; margin-bottom:3px; font-size:7px;">Terms & Conditions</h4>
+            <ol style="padding-left:12px; color:#64748b; line-height:1.5;">
+                <li>Payment due within 45 days of invoice date.</li>
+                <li>Cheque/NEFT in favour of "I FOUR U ENGINEERING SERVICES".</li>
+                <li>Goods once sold will not be taken back.</li>
+                <li>Subject to Dhanbad jurisdiction.</li>
+            </ol>
+            <p style="color:#94a3b8; font-style:italic; margin-top:4px; font-size:6px;">This is a computer-generated invoice.</p>
+        </div>
+        <div style="text-align:center; width:140px;">
+            <p style="font-size:7px; color:#64748b; margin-bottom:2px;">Certified that the particulars given above are true and correct</p>
+            <div style="border-top:1px solid #cbd5e1; padding-top:25px; margin-top:4px;">
+                <p style="font-weight:700; color:#1e293b; font-size:8px;">Authorized Signatory</p>
+                <p style="color:#64748b; font-size:7px;">For I FOUR U ENGINEERING SERVICES</p>
             </div>
         </div>
     </div>
@@ -461,7 +452,7 @@ const invoiceHTML = `<!DOCTYPE html>
 async function generate() {
     // 1. Save HTML
     const safeNo = invoiceNo.replace(/[\/\\]/g, '-');
-    const htmlPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_${baseName}_INVOICE.html`);
+    const htmlPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_KusuongToilet_INVOICE.html`);
     fs.writeFileSync(htmlPath, invoiceHTML);
     console.log('Saved HTML:', htmlPath);
     
@@ -470,7 +461,7 @@ async function generate() {
     const page = await browser.newPage();
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
     
-    const pdfPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_${baseName}_INVOICE.pdf`);
+    const pdfPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_KusuongToilet_INVOICE.pdf`);
     await page.pdf({ path: pdfPath, format: 'A4', printBackground: true, margin: { top: '0', bottom: '0', left: '0', right: '0' } });
     await page.close();
     await browser.close();
@@ -569,11 +560,11 @@ async function generate() {
     ws.getCell(`A${rIdx}`).value = "Bank IFSC and Address : HDFC0002679 , Sri Ram City Saraidhela, 828127"; rIdx += 2;
     ws.getCell(`A${rIdx}`).value = "Amount in Words: " + amountInWords; ws.getCell(`A${rIdx}`).font = { italic: true };
     
-    const excelPath = path.join(__dirname, 'new_invoices_excel', `${safeNo}_${baseName}_INVOICE.xlsx`);
+    const excelPath = path.join(__dirname, 'new_invoices_excel', `${safeNo}_KusuongToilet_INVOICE.xlsx`);
     await wb.xlsx.writeFile(excelPath);
     console.log('Generated Excel:', excelPath);
     
-    console.log(`\n✅ All done! PDF, HTML, and Excel generated for ${baseName}.`);
+    console.log('\n✅ All done! PDF, HTML, and Excel generated for Kusuong Toilet Bill.');
     console.log(`  Items: ${sections.reduce((a, s) => a + s.items.length, 0)} | Sections: ${sections.length}`);
     console.log(`  Total: ₹${fmt(totalAmount)} | IGST: ₹${fmt(igstAmount)} | Grand Total: ₹${fmt(grandTotal)}`);
 }
