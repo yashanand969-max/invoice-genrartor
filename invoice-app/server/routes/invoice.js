@@ -53,11 +53,18 @@ router.post('/upload', upload.single('file'), (req, res) => {
 
 router.post('/download', async (req, res) => {
     try {
-        const { invoiceType, invoiceData } = req.body;
+        const { invoiceType, invoiceData } = req.body || {};
         
-        if (!invoiceData) {
-            return res.status(400).json({ error: 'Invoice data is required' });
+        if (!invoiceData || typeof invoiceData !== 'object') {
+            console.error('Download error: Missing or invalid invoiceData. Body keys:', Object.keys(req.body || {}));
+            return res.status(400).json({ error: 'Invoice data is required. The request body may have been truncated.' });
         }
+
+        if (!invoiceType) {
+            return res.status(400).json({ error: 'Invoice type is required.' });
+        }
+
+        console.log(`Generating PDF for ${invoiceType} invoice: ${invoiceData.invoiceNo || 'Unknown'}`);
 
         // Re-generate HTML from state data to ensure PDF exactly matches what was previewed.
         let htmlContext = '';
@@ -70,7 +77,7 @@ router.post('/download', async (req, res) => {
             htmlContext = apolloTemplate.renderFromData(invoiceData);
             pdfName = `APOLLO_Invoice_${invoiceData.invoiceNo||'Unknown'}.pdf`;
         } else {
-            return res.status(400).json({ error: 'Invalid invoice type' });
+            return res.status(400).json({ error: `Invalid invoice type: ${invoiceType}` });
         }
 
         const pdfBuffer = await generatePdf(htmlContext);
@@ -83,8 +90,8 @@ router.post('/download', async (req, res) => {
         
         res.send(pdfBuffer);
     } catch (error) {
-         console.error('Error generating PDF:', error);
-         res.status(500).json({ error: error.message });
+         console.error('Error generating PDF:', error.message, error.stack);
+         res.status(500).json({ error: `PDF generation failed: ${error.message}` });
     }
 });
 
