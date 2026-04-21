@@ -9,7 +9,9 @@ const logoBase64 = fs.readFileSync(path.join(__dirname, 'logo/WhatsApp Image 202
 const logoDataUri = `data:image/jpeg;base64,${logoBase64}`;
 
 // Read the Excel file
-const workbook = xlsx.readFile(path.join(__dirname, 'work/KusuongToiletBill.xlsx'), { cellDates: true });
+const inputFile = process.argv[2] || 'work/KusuongToiletBill.xlsx';
+const baseName = path.basename(inputFile, '.xlsx').replace(/\s+/g, '');
+const workbook = xlsx.readFile(path.resolve(__dirname, inputFile), { cellDates: true });
 const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, raw: false, dateNF: 'dd-mm-yyyy' });
 const data = rawData.map(row => Array.from(row).map(cell => (cell !== undefined && cell !== null) ? String(cell).trim() : ''));
 
@@ -263,7 +265,7 @@ const invoiceHTML = `<!DOCTYPE html>
         
         .a4-page {
             width: 210mm; min-height: 297mm; margin: 0 auto; background: white;
-            position: relative; box-sizing: border-box; display: flex; flex-direction: column;
+            position: relative; box-sizing: border-box;
             padding: 12mm 15mm;
         }
         
@@ -292,8 +294,13 @@ const invoiceHTML = `<!DOCTYPE html>
         .text-slate-800 { color: #1e293b; }
         .text-green-700 { color: #15803d; }
         
-        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-        tr { page-break-inside: avoid; break-inside: avoid; }
+        .avoid-break { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
+            display: table; 
+            width: 100%; 
+        }
+        tr { page-break-inside: avoid !important; break-inside: avoid !important; }
         
         @media print {
             body { background: white; margin: 0; padding: 0; }
@@ -367,7 +374,7 @@ const invoiceHTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============ ITEMS TABLE ============ -->
-    <div style="flex:1;">
+    <div style="margin-bottom: 20px;">
         <table>
             <thead><tr>
                 <th style="width:4%; text-align:center;">S.No</th>
@@ -454,7 +461,7 @@ const invoiceHTML = `<!DOCTYPE html>
 async function generate() {
     // 1. Save HTML
     const safeNo = invoiceNo.replace(/[\/\\]/g, '-');
-    const htmlPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_KusuongToilet_INVOICE.html`);
+    const htmlPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_${baseName}_INVOICE.html`);
     fs.writeFileSync(htmlPath, invoiceHTML);
     console.log('Saved HTML:', htmlPath);
     
@@ -463,7 +470,7 @@ async function generate() {
     const page = await browser.newPage();
     await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
     
-    const pdfPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_KusuongToilet_INVOICE.pdf`);
+    const pdfPath = path.join(__dirname, 'new_invoices_pdf', `${safeNo}_${baseName}_INVOICE.pdf`);
     await page.pdf({ path: pdfPath, format: 'A4', printBackground: true, margin: { top: '0', bottom: '0', left: '0', right: '0' } });
     await page.close();
     await browser.close();
@@ -562,11 +569,11 @@ async function generate() {
     ws.getCell(`A${rIdx}`).value = "Bank IFSC and Address : HDFC0002679 , Sri Ram City Saraidhela, 828127"; rIdx += 2;
     ws.getCell(`A${rIdx}`).value = "Amount in Words: " + amountInWords; ws.getCell(`A${rIdx}`).font = { italic: true };
     
-    const excelPath = path.join(__dirname, 'new_invoices_excel', `${safeNo}_KusuongToilet_INVOICE.xlsx`);
+    const excelPath = path.join(__dirname, 'new_invoices_excel', `${safeNo}_${baseName}_INVOICE.xlsx`);
     await wb.xlsx.writeFile(excelPath);
     console.log('Generated Excel:', excelPath);
     
-    console.log('\n✅ All done! PDF, HTML, and Excel generated for Kusuong Toilet Bill.');
+    console.log(`\n✅ All done! PDF, HTML, and Excel generated for ${baseName}.`);
     console.log(`  Items: ${sections.reduce((a, s) => a + s.items.length, 0)} | Sections: ${sections.length}`);
     console.log(`  Total: ₹${fmt(totalAmount)} | IGST: ₹${fmt(igstAmount)} | Grand Total: ₹${fmt(grandTotal)}`);
 }

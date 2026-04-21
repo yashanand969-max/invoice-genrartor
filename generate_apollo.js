@@ -170,14 +170,19 @@ const invoiceHTML = `<!DOCTYPE html>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .heading-font { font-family: 'Montserrat', sans-serif; }
-        .a4-page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 12mm 15mm; display: flex; flex-direction: column; }
+        .a4-page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 12mm 15mm; }
         table { width: 100%; border-collapse: collapse; font-size: 0.65rem; }
         th, td { border: 1px solid var(--border); padding: 4px 6px; }
         th { background-color: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 0.5px; }
         .section-header td { border-left-color: var(--primary) !important; }
         .text-center { text-align: center; } .text-right { text-align: right; }
-        .avoid-break { page-break-inside: avoid; break-inside: avoid; }
-        tr { page-break-inside: avoid; break-inside: avoid; }
+        .avoid-break { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
+            display: table; 
+            width: 100%; 
+        }
+        tr { page-break-inside: avoid !important; break-inside: avoid !important; }
     </style>
 </head>
 <body>
@@ -225,7 +230,7 @@ const invoiceHTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <div style="flex:1;">
+    <div style="margin-bottom: 20px;">
         <table>
             <thead><tr>
                 <th style="width:4%;">S.No</th>
