@@ -1,9 +1,23 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 async function generatePdf(htmlContent) {
+    let execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (!execPath) {
+        if (fs.existsSync('/usr/bin/google-chrome-stable')) {
+            execPath = '/usr/bin/google-chrome-stable';
+        } else if (fs.existsSync('/usr/bin/google-chrome')) {
+            execPath = '/usr/bin/google-chrome';
+        } else if (fs.existsSync('/usr/bin/chromium')) {
+            execPath = '/usr/bin/chromium';
+        } else {
+            execPath = puppeteer.executablePath();
+        }
+    }
+
     const browser = await puppeteer.launch({ 
         headless: true,
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+        executablePath: execPath,
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
