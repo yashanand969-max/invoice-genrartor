@@ -29,11 +29,11 @@ router.post('/upload', upload.single('file'), (req, res) => {
              // For Chola, you might want to structure generic parsedDetails specifically
              // or expect parseExcel to provide enough unified structure.
              // Here we use the raw data to extract using specific extractors if needed
-             const templateResult = cholaTemplate.extractAndRender(parsedData.rawData);
+             const templateResult = cholaTemplate.extractAndRender(parsedData.rawData, parsedData.sourceWorkbook);
              previewHtml = templateResult.html;
              invoiceData = templateResult.data;
         } else if (invoiceType === 'APOLLO') {
-             const templateResult = apolloTemplate.extractAndRender(parsedData.rawData);
+             const templateResult = apolloTemplate.extractAndRender(parsedData.rawData, parsedData.sourceWorkbook);
              previewHtml = templateResult.html;
              invoiceData = templateResult.data;
         } else {
