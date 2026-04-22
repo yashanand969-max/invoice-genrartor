@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const { renderSourceAppendix } = require('./sourceAppendix');
 
-function extractDataFromRaw(data) {
+function extractDataFromRaw(data, sourceWorkbook) {
     const companyName = 'M/S I FOUR U ENGINEERING SERVICES';
     const companyAddress = 'House No. 329, New Karmik Nagar, PO ISM, Dhanbad, Jharkhand, 826004';
     const companyPhone = '+91 7042220470';
@@ -29,6 +30,14 @@ function extractDataFromRaw(data) {
     // Items
     const sections = [];
     let currentSection = null;
+    const itemHeader = data.find(row => {
+        const rowStr = (row || []).join(' ').toUpperCase();
+        return rowStr.includes('S NO') && rowStr.includes('ITEM NAME');
+    }) || [];
+    const hasGstRateColumn = itemHeader.some(cell => String(cell).toUpperCase().includes('GST RATE'));
+    const unitCol = hasGstRateColumn ? 5 : 4;
+    const priceCol = hasGstRateColumn ? 6 : 5;
+    const qtyCol = hasGstRateColumn ? 7 : 6;
 
     for (let i = 18; i < data.length; i++) {
         const row = data[i];
@@ -57,22 +66,23 @@ function extractDataFromRaw(data) {
         }
         
         if (!isNaN(lastVal) && lastVal > 0 && cleanRow.length >= 4) {
+            const shiftedSerial = !row[0] && row[1] && row[2];
             const item = {
                 sno: row[0] || row[1] || '',
-                name: row[1] || row[2] || '',
-                desc: row[2] || '',
+                name: shiftedSerial ? row[2] : (row[1] || row[2] || ''),
+                desc: shiftedSerial ? '' : (row[2] || ''),
                 sac: row[3] || '',
-                gstRate: row[4] || '18%',
-                unit: row[5] || '',
-                price: parseFloat(String(row[6]||'').replace(/[^\d.-]/g,'')) || 0,
-                qty: parseFloat(String(row[7]||'').replace(/[^\d.-]/g,'')) || 0,
+                gstRate: hasGstRateColumn ? (row[4] || '18%') : '18%',
+                unit: row[unitCol] || '',
+                price: parseFloat(String(row[priceCol]||'').replace(/[^\d.-]/g,'')) || 0,
+                qty: parseFloat(String(row[qtyCol]||'').replace(/[^\d.-]/g,'')) || 0,
                 amount: lastVal
             };
             
             if (!row[0] && row[1]) {
                 item.sno = row[1];
                 item.name = row[2] || '';
-                item.desc = row[2] || '';
+                item.desc = shiftedSerial ? '' : (row[2] || '');
             }
             
             if (currentSection) {
@@ -81,6 +91,12 @@ function extractDataFromRaw(data) {
                 currentSection = { name: 'General', items: [] };
                 sections.push(currentSection);
                 currentSection.items.push(item);
+            }
+        } else if (cleanRow.length > 0 && currentSection && !rowStr.includes('S NO')) {
+            const sectionName = cleanRow.join(' ').trim();
+            if (sectionName) {
+                currentSection = { name: sectionName, items: [] };
+                sections.push(currentSection);
             }
         }
     }
@@ -151,7 +167,8 @@ function extractDataFromRaw(data) {
         invoiceNo, invoiceDate, placeOfSupply, transportMode, vehicleNo, reverseCharge, workOrder,
         billToName, billToAddress, billToState, billToStateCode, billToGSTIN,
         consigneeName, consigneeAddress, consigneeState, consigneeStateCode,
-        sections, totalAmount, igstAmount, grandTotal, amountInWords, gstRows
+        sections, totalAmount, igstAmount, grandTotal, amountInWords, gstRows,
+        sourceWorkbook
     };
 }
 
@@ -165,8 +182,10 @@ function renderFromData(extractedData) {
         invoiceNo, invoiceDate, placeOfSupply, transportMode, vehicleNo, reverseCharge, workOrder,
         billToName, billToAddress, billToState, billToStateCode, billToGSTIN,
         consigneeName, consigneeAddress, consigneeState, consigneeStateCode,
-        sections, totalAmount, igstAmount, grandTotal, amountInWords, gstRows
+        sections, totalAmount, igstAmount, grandTotal, amountInWords, gstRows,
+        sourceWorkbook
     } = extractedData;
+    const sourceAppendixHtml = renderSourceAppendix(sourceWorkbook);
 
     let logoDataUri = '';
     try {
@@ -344,12 +363,13 @@ function renderFromData(extractedData) {
         </div>
     </footer>
 </div>
+${sourceAppendixHtml}
 </body>
 </html>`;
 }
 
-function extractAndRender(rawData) {
-    const data = extractDataFromRaw(rawData);
+function extractAndRender(rawData, sourceWorkbook) {
+    const data = extractDataFromRaw(rawData, sourceWorkbook);
     const html = renderFromData(data);
     return { data, html };
 }
