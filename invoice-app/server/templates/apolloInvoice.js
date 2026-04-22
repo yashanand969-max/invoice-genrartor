@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { renderSourceAppendix } = require('./sourceAppendix');
 
 // Extract the logic to read and render
-function extractDataFromRaw(data) {
+function extractDataFromRaw(data, sourceWorkbook) {
     const companyName = 'M/S I FOUR U ENGINEERING SERVICES';
     const companyAddress = 'House No. 329, New Karmik Nagar, PO ISM, Dhanbad, Jharkhand, 826004';
     const companyPhone = '+91 7042220470';
@@ -70,6 +71,12 @@ function extractDataFromRaw(data) {
                 sections.push(currentSection);
             }
             currentSection.items.push(item);
+        } else if (cleanRow.length > 0 && currentSection && !rowStr.includes('S NO')) {
+            const sectionName = cleanRow.join(' ').trim();
+            if (sectionName) {
+                currentSection = { name: sectionName, items: [] };
+                sections.push(currentSection);
+            }
         }
     }
 
@@ -113,7 +120,8 @@ function extractDataFromRaw(data) {
         invoiceNo, invoiceDate, placeOfSupply, workOrder,
         billToName, billToAddress, billToState, billToStateCode, billToGSTIN,
         consigneeName, consigneeAddress,
-        sections, outstationCharges, totalAmount, igstAmount, grandTotal, amountInWords
+        sections, outstationCharges, totalAmount, igstAmount, grandTotal, amountInWords,
+        sourceWorkbook
     };
 }
 
@@ -127,8 +135,10 @@ function renderFromData(extractedData) {
         invoiceNo, invoiceDate, placeOfSupply, workOrder,
         billToName, billToAddress, billToState, billToStateCode, billToGSTIN,
         consigneeName, consigneeAddress,
-        sections, outstationCharges, totalAmount, igstAmount, grandTotal, amountInWords
+        sections, outstationCharges, totalAmount, igstAmount, grandTotal, amountInWords,
+        sourceWorkbook
     } = extractedData;
+    const sourceAppendixHtml = renderSourceAppendix(sourceWorkbook);
 
     let logoDataUri = '';
     try {
@@ -277,12 +287,13 @@ function renderFromData(extractedData) {
         </div>
     </footer>
 </div>
+${sourceAppendixHtml}
 </body>
 </html>`;
 }
 
-function extractAndRender(rawData) {
-    const data = extractDataFromRaw(rawData);
+function extractAndRender(rawData, sourceWorkbook) {
+    const data = extractDataFromRaw(rawData, sourceWorkbook);
     const html = renderFromData(data);
     return { data, html };
 }
