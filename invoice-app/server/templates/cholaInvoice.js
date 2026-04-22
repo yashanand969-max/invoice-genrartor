@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { renderSourceAppendix } = require('./sourceAppendix');
 
 function extractDataFromRaw(data, sourceWorkbook) {
     const companyName = 'M/S I FOUR U ENGINEERING SERVICES';
@@ -185,7 +184,6 @@ function renderFromData(extractedData) {
         sections, totalAmount, igstAmount, grandTotal, amountInWords, gstRows,
         sourceWorkbook
     } = extractedData;
-    const sourceAppendixHtml = renderSourceAppendix(sourceWorkbook);
 
     let logoDataUri = '';
     try {
@@ -363,7 +361,6 @@ function renderFromData(extractedData) {
         </div>
     </footer>
 </div>
-${sourceAppendixHtml}
 </body>
 </html>`;
 }
